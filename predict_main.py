@@ -34,7 +34,6 @@ import utils
 from find_entity import exacter_acmation
 from curLine_file import curLine, normal_transformer, other_tag
 
-sep_str = '$'
 FLAGS = flags.FLAGS
 flags.DEFINE_string(
     'input_file', None,
@@ -84,6 +83,7 @@ def main(argv):
     slot_label_map = utils.read_label_map(FLAGS.slot_label_map_file)
     target_domain_name = FLAGS.domain_name
     print(curLine(), "target_domain_name:", target_domain_name)
+    assert target_domain_name in ["navigation", "phone_call", "music"]
     entity_type_list = utils.read_label_map(FLAGS.entity_type_list_file)[FLAGS.domain_name]
 
     builder = bert_example.BertExampleBuilder(label_map, FLAGS.vocab_file,
@@ -134,6 +134,10 @@ def main(argv):
             previous_pred_slot_list.append(predSlot)
             previous_pred_intent_list.append(predIntent)
             query = normal_transformer(raw_query)
+            if query != raw_query:
+                print(curLine(), len(query),     "query:    ", query)
+                print(curLine(), len(raw_query), "raw_query:", raw_query)
+
             sources = []
             if row_id > 0 and sessionId == session_list[row_id - 1][0]:
                 sources.append(session_list[row_id - 1][1])  # last query

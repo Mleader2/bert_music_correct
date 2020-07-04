@@ -9,7 +9,7 @@ from Levenshtein import distance
 from curLine_file import curLine
 from find_entity.exacter_acmation import get_all_entity
 from confusion_words_danyin import  correct_song, correct_singer
-tongyin_yuzhi = 0.8
+tongyin_yuzhi = 0.65 #  优化得到0.65 0.8高了
 # tongyin_yuzhi_singer = 0.9
 
 # from confusion_words import pinyin_similar_word_noduoyin, singer_pinyin, song_pinyin
@@ -36,8 +36,7 @@ def get_char_similarScore(predict_entity, known_entity):
 def get_slot_info_str_forMusic(slot_info, raw_query, entityTypeMap):  # 列表连接成字符串
   # 没有直接ｊｏｉｎ得到字符串，因为想要剔除某些只有一个字的实体　例如phone_num
   # print(curLine(), len(slot_info), "slot_info:", slot_info)
-  if "货源" in raw_query or "开花" in raw_query:
-    print(curLine(), raw_query, entityTypeMap)
+
   slot_info_block = []
   param_list = []
   current_entityType = None
@@ -55,7 +54,7 @@ def get_slot_info_str_forMusic(slot_info, raw_query, entityTypeMap):  # 列表�
       entity_after = slot_info_block_str
       priority = 0  # 优先级
       ignore_flag = False  # 是否忽略这个槽值
-      if slot_info_block_str in {"什么歌","一首","小花","叮当","傻逼", "给你听","现在","喜欢","ye ye","没", "j c"}: # 黑名单　不是一个槽值
+      if slot_info_block_str in {"什么歌","一首","小花","叮当","傻逼", "给你听","现在","喜欢","ye ye","没","去你娘的蛋", "j c"}: # 黑名单　不是一个槽值
         ignore_flag = True  # 忽略这个槽值
       else:
         # 逐个实体计算和slot_info_block_str的相似度
@@ -96,16 +95,14 @@ def get_slot_info_str_forMusic(slot_info, raw_query, entityTypeMap):  # 列表�
     # print(curLine(), token, len(param_list), "param_list:", param_list)
   param_list_sorted = sorted(param_list, key=lambda item: len(item['before'])*100+item['priority'],
                              reverse=True)
-  slot_info_str = raw_query
+  slot_info_str_list = [raw_query]
   replace_query = raw_query
   for param in param_list_sorted:
     entity_before = param['before']
     replace_str = entity_before
     if replace_str not in replace_query:
-      # print(curLine(), "%s not in %s" % (replace_str, replace_query))
-      # input(curLine())
       continue
-    replace_query = replace_query.replace(replace_str, "")
+    replace_query = replace_query.replace(replace_str, "", 1)  # 只替换一次
     entityType = param['entityType']
 
     if param['priority'] == 0:  # 模型识别的结果不在库中，尝试用拼音纠错
@@ -113,7 +110,7 @@ def get_slot_info_str_forMusic(slot_info, raw_query, entityTypeMap):  # 列表�
       best_similar_word = None
       if entityType == "singer":
         similar_score, best_similar_word = correct_singer(entity_before, jichu_distance=0.001, char_ratio=0.1)
-        similar_score -= 0.1 # TODO 提高对ｓｉｎｇｅｒ的阈值
+        # similar_score -= 0.1 # TODO 提高对ｓｉｎｇｅｒ的阈值
       elif entityType == "song":
         similar_score, best_similar_word = correct_song(entity_before, jichu_distance=0.001, char_ratio=0.48)
 
@@ -123,21 +120,30 @@ def get_slot_info_str_forMusic(slot_info, raw_query, entityTypeMap):  # 列表�
       #   similar_score, best_similar_word = pinyin_similar_word_noduoyin(song_pinyin, entity_before)
 
       if similar_score > tongyin_yuzhi and best_similar_word != entity_before:
-          print(curLine(), entityType, "entity_before:",entity_before, best_similar_word, similar_score, "\n")
+          print(curLine(), entityType, "entity_before:",entity_before, best_similar_word, similar_score)
           param['after'] = best_similar_word
-
-
-      # if similar_score > tongyin_yuzhi and best_similar_word != entity_before:
-      #     # print(curLine(), entityType, "entity_before:",entity_before, best_similar_word, similar_score, "\n")
-      #     param['after'] = best_similar_word
 
     if entity_before != param['after']:
       replace_str = "%s||%s" % (entity_before, param['after'])
-    assert entity_before in slot_info_str
-    slot_info_str = slot_info_str.replace(entity_before, "<%s>%s</%s>" % (entityType, replace_str, entityType))
-  # print(curLine(), "slot_info_str:", slot_info_str)
-  # print(curLine(), len(param_list_sorted), "param_list_sorted:", param_list_sorted)
-  # print(curLine())
+    for s_index,s in enumerate(slot_info_str_list):
+      if entity_before not in s or ("</" in s and ">" in s):  # 不是当前槽值或，已经是一个槽值不能再替换
+        continue
+      insert_list = []
+      start_index = s.find(entity_before)
+      if start_index > 0:
+        insert_list.append(s[:start_index])
+      insert_list.append("<%s>%s</%s>" % (entityType, replace_str, entityType))
+      end_index = start_index+len(entity_before)
+      if end_index < len(s):
+        insert_list.append(s[end_index:])
+      slot_info_str_list = slot_info_str_list[:s_index] + insert_list + slot_info_str_list[s_index+1:]
+      break  # 一个槽值只替换一次
+  slot_info_str = "".join(slot_info_str_list)
+  # if "大悲咒" in raw_query or "播一下我的楼兰" in raw_query: # "货源" in raw_query or "开花" in raw_query or
+  #   print(curLine(), raw_query, entityTypeMap)
+  #   print(curLine(), "slot_info_str:", slot_info_str)
+  #   print(curLine(), len(param_list_sorted), "param_list_sorted:", param_list_sorted)
+  #   input(curLine())
   return slot_info_str
 
 
@@ -181,7 +187,7 @@ def get_slot_info_str(slot_info, raw_query, entityTypeMap): # 列表连接成字
               if current_entityType == "singer":
                 similar_score, best_similar_word = correct_singer(slot_info_block_str)
               elif current_entityType == "song":
-                similar_score, best_similar_word = correct_song(slot_info_block_str)
+                similar_score, best_similar_word = correct_song(slot_info_block_str, char_ratio=0.55, char_distance=0.0)
               if best_similar_word != slot_info_block_str:
                 if similar_score > tongyin_yuzhi:
                   # print(curLine(), current_entityType, slot_info_block_str, best_similar_word, similar_score)
@@ -206,8 +212,6 @@ def get_slot_info_str(slot_info, raw_query, entityTypeMap): # 列表连接成字
             ignore_flag = False # 不忽略
         if ignore_flag:
           slot_info_str.extend([slot_info_block_str])
-          # print(curLine(), "ignore:",current_entityType, slot_info_block_str)
-          # input(curLine())
         else:
           slot_info_str.extend(["<%s>" % current_entityType, slot_info_block_str, token])
 

@@ -87,18 +87,18 @@ export NUM_EVAL_EXAMPLES=5000
 ### 4. Prediction
 
 #### Export the model.
-echo "Export the model."
-python run_lasertagger.py \
-  --label_map_file=${label_map_file} \
-  --slot_label_map_file=${slot_label_map_file} \
-  --model_config_file=${CONFIG_FILE} \
-  --max_seq_length=${max_seq_length} \
-  --kernel_size=${kernel_size}  \
-  --output_dir=${MODEL_DIR}  \
-  --do_export=true \
-  --export_path="${MODEL_DIR}/export" \
-  --domain_name=${DOMAIN_NAME} \
-  --entity_type_list_file=${entity_type_list_file}
+#echo "Export the model."
+#python run_lasertagger.py \
+#  --label_map_file=${label_map_file} \
+#  --slot_label_map_file=${slot_label_map_file} \
+#  --model_config_file=${CONFIG_FILE} \
+#  --max_seq_length=${max_seq_length} \
+#  --kernel_size=${kernel_size}  \
+#  --output_dir=${MODEL_DIR}  \
+#  --do_export=true \
+#  --export_path="${MODEL_DIR}/export" \
+#  --domain_name=${DOMAIN_NAME} \
+#  --entity_type_list_file=${entity_type_list_file}
 #
 ######### Get the most recently exported model directory.
 TIMESTAMP=$(ls "${MODEL_DIR}/export/" | \
