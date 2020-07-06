@@ -75,26 +75,6 @@ class LaserTaggerPredictor(object):
     out = self._predictor(input_info)
     intent_list = []
     slot_list = []
-    # print(curLine(), out.keys())
-    # batch_size = out['batch_size']
-    # length = 45
-    # print(curLine(), "batch_size:", batch_size)
-    # entity_type_emb_list = np.reshape(out['entity_type_emb'], (batch_size, length, -1))
-    # print(curLine(), np.shape(entity_type_emb_list), "entity_type_emb——ｌｉｓ:")
-    #
-    # impact_weight_matrix = out['impact_weight_matrix']
-    # impact_weight_matrix = np.reshape(impact_weight_matrix, (batch_size, length, -1))
-    # print(curLine(), np.shape(impact_weight_matrix), "impact_weight_matrix:", impact_weight_matrix)
-    #
-    # entity_type_ids_matrix_list = np.reshape(out['entity_type_ids_matrix'], (batch_size, length, -1))
-    # print(curLine(), np.shape(entity_type_ids_matrix_list), "entity_type_ids_matrix_list:", entity_type_ids_matrix_list[0])
-    #
-    #
-    # slot_logits_list = np.reshape(out['slot_logits'], (batch_size, length, -1))
-    # print(curLine(), np.shape(slot_logits_list), "slot_logits[0]:", slot_logits_list[0])
-    # final_layer_list = np.reshape(out['final_layer'], (batch_size, length, -1))
-    # print(curLine(), np.shape(final_layer_list), "final_layer_list[0]:", final_layer_list[0])
-    # print(curLine())
 
     for index, intent in enumerate(out['pred_intent']):
       predicted_intent_ids = intent.tolist()
@@ -140,28 +120,8 @@ class LaserTaggerPredictor(object):
           slot_info = query
         else:
           slot_info = self.get_slot_info(out['pred_slot'][index], example_list[index], input_tokens_list[index], query)
-        # if "</" in slot_info and ">" in slot_info:
-        #   predict_intent = "play"
       intent_list.append(predict_intent)
       slot_list.append(slot_info)
-      # entity_type_ids_matrix = entity_type_ids_matrix_list[index]
-      # print(curLine(), np.shape(entity_type_ids_matrix), "entity_type_ids_matrix:", entity_type_ids_matrix)
-      #
-      # entity_type_ids_matrix1 = entity_type_emb_list[index]
-      # print(curLine(), np.shape(entity_type_ids_matrix1), "entity_type_ids_matrix1 0:", entity_type_ids_matrix1[:,0])
-      # print(curLine(), np.shape(entity_type_ids_matrix1), "entity_type_ids_matrix1 1:", entity_type_ids_matrix1[:,1])
-      # print(curLine(), np.shape(entity_type_ids_matrix1), "entity_type_ids_matrix1 -2:", entity_type_ids_matrix1[:,-2])
-      # print(curLine(), np.shape(entity_type_ids_matrix1), "entity_type_ids_matrix1 -1:", entity_type_ids_matrix1[:,-1])
-      # slot_logits = slot_logits_list[index]
-      # final_layer = final_layer_list[index]
-      # print(curLine(), np.shape(slot_logits), "slot_logits max:", np.max(slot_logits, -1))
-      # print(curLine(), np.shape(final_layer), "final_layer:", np.max(final_layer, -1))
-      # example = example_list[index]
-      # for key in keys:
-      #   print(curLine(), key, example.features[key])
-      #
-      # print(curLine(), index, input_tokens_list[index], slot_info)
-      # input(curLine())
     return intent_list, slot_list
 
   def get_slot_info(self, slot, example, input_tokens, query):

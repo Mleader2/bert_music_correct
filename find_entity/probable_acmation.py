@@ -2,7 +2,7 @@
 #　用ａｃ自动机构建发现疑似实体的工具
 import os
 from collections import defaultdict
-import json, time
+import json
 import re
 from .acmation import KeywordTree, add_to_ac, neibu_folder, waibu_folder
 from curLine_file import curLine, normal_transformer
@@ -25,46 +25,6 @@ for domain, entity_type_list in domain2entity_map.items():
             ac = KeywordTree(case_insensitive=True)
         else:
             ac = self_entity_trie_tree[entity_type]
-        ############# 按照优先级别从低到高的顺序来加载
-        # if entity_type in ["song"]: # "singer",
-        #     entity_file = waibu_folder + "%s.json"%entity_type
-        #     with open(entity_file, "r") as f:
-        #         current_entity_dict = json.load(f)
-        #         print(curLine(), "get %d %s from %s" %
-        #               (len(current_entity_dict), entity_type, entity_file))
-        #     for entity_before, entity_times in current_entity_dict.items():
-        #         if entity_type=="song" and len(entity_before)<3:
-        #             continue  # ignore
-        #         entity_after = entity_before
-        #         pri = 1
-        #         if entity_type in ["song"]:
-        #             pri -= 0.5
-        #         add_to_ac(ac, entity_type, entity_before, entity_after, pri=pri)
-
-        # if entity_type == "city":
-        #     for current_entity_type in ["city", "province"]:
-        #         entity_file = waibu_folder + "%s.json" % current_entity_type
-        #         with open(entity_file, "r") as f:
-        #             current_entity_dict = json.load(f)
-        #             print(curLine(), "get %d %s from %s" %
-        #                   (len(current_entity_dict), current_entity_type, entity_file))
-        #         for entity_before, entity_times in current_entity_dict.items():
-        #             entity_after = entity_before
-        #             add_to_ac(ac, entity_type, entity_before, entity_after, pri=1)
-
-        # ## 从标注语料中挖掘得到
-        # entity_file = os.path.join(neibu_folder, "%s.json" % entity_type)
-        # with open(entity_file, "r") as fr:
-        #     current_entity_dict = json.load(fr)
-        # print(curLine(), "get %d %s from %s" % (len(current_entity_dict), entity_type, entity_file))
-        # for entity_before, entity_after_times in current_entity_dict.items():
-        #     entity_after = entity_after_times[0]
-        #     pri = 2
-        #     if entity_type in ["song"]:
-        #         pri -= 0.5
-        #     add_to_ac(ac, entity_type, entity_before, entity_after, pri=pri)
-        # if entity_type == "song":
-        #     add_to_ac(ac, entity_type, "花的画", "花的话", 1.5)
 
         # TODO
         if entity_type == "city":

@@ -164,6 +164,8 @@ def main(argv):
         # if len(domain_list) > 0:  # 有标注
         #     writer.write("\t".join(["sessionId", "query", "predDomain", "predIntent", "predSlot", "domain", "intent", "Slot"]) + "\n")
         for batch_id in range(batch_num):
+            # if batch_id <= 48:
+            #     continue
             sources_batch = sources_list[batch_id * predict_batch_size: (batch_id + 1) * predict_batch_size]
             predict_domain_batch = predict_domain_list[batch_id * predict_batch_size: (batch_id + 1) * predict_batch_size]
             predict_intent_batch, predict_slot_batch = predictor.predict_batch(sources_batch=sources_batch, target_domain_name=target_domain_name, predict_domain_batch=predict_domain_batch)

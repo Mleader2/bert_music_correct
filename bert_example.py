@@ -229,9 +229,6 @@ class BertExampleBuilder(object):
                 index_start = queryId2tokenId[index.start()]
                 index_end = queryId2tokenId[index.end()-1]+1
                 entity_type_ids[index_start:index_end, entity_type_id] = 1  # TODO  实体类型,未包含分词信息
-    # print(curLine(), len(query), "query:", query)
-    # print(curLine(), "entity_type_ids:\n", entity_type_ids)
-    # input(curLine())
     if len(sources) > 1:  #  up context
       context_tokens = self._tokenizer.tokenize(sources[0]) + ['[SEP]']
       slot_tags.extend(["O"] * len(context_tokens))

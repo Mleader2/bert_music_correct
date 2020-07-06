@@ -9,11 +9,7 @@ from Levenshtein import distance
 from curLine_file import curLine
 from find_entity.exacter_acmation import get_all_entity
 from confusion_words_danyin import  correct_song, correct_singer
-tongyin_yuzhi = 0.65 #  优化得到0.65 0.8高了
-# tongyin_yuzhi_singer = 0.9
-
-# from confusion_words import pinyin_similar_word_noduoyin, singer_pinyin, song_pinyin
-# tongyin_yuzhi = 0.75
+tongyin_yuzhi = 0.75
 
 
 char_distance_yuzhi = 0.6
@@ -120,7 +116,7 @@ def get_slot_info_str_forMusic(slot_info, raw_query, entityTypeMap):  # 列表�
       #   similar_score, best_similar_word = pinyin_similar_word_noduoyin(song_pinyin, entity_before)
 
       if similar_score > tongyin_yuzhi and best_similar_word != entity_before:
-          print(curLine(), entityType, "entity_before:",entity_before, best_similar_word, similar_score)
+          # print(curLine(), entityType, "entity_before:",entity_before, best_similar_word, similar_score)
           param['after'] = best_similar_word
 
     if entity_before != param['after']:
