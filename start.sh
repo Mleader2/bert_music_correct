@@ -1,8 +1,4 @@
-# 文本摘要任务
-# python -m pip install --upgrade pip -i https://pypi.douban.com/simple
-# pip install -i https://pypi.douban.com/simple/ bert-tensorflow==1.0.1
-# pip install -i https://pypi.douban.com/simple/ tensorflow==1.15.0
-
+# 意图识别和填槽模型
 start_tm=`date +%s%N`;
 
 export HOST_NAME=$1
@@ -29,8 +25,8 @@ export drop_keep_prob=0.9
 export MAX_INPUT_EXAMPLES=1000000
 export SAVE_CHECKPOINT_STEPS=1000
 export CORPUS_DIR="/home/${HOST_NAME}/Mywork/corpus/compe/69"
-export BERT_BASE_DIR="/home/${HOST_NAME}/Mywork/model/chinese_L-12_H-768_A-12" #
-export CONFIG_FILE=configs/lasertagger_config.json  # lasertagger_config-tiny.json
+export BERT_BASE_DIR="/home/${HOST_NAME}/Mywork/model/chinese_L-12_H-768_A-12"
+export CONFIG_FILE=configs/lasertagger_config.json
 export OUTPUT_DIR="${CORPUS_DIR}/${DOMAIN_NAME}_output"
 export MODEL_DIR="${OUTPUT_DIR}/${DOMAIN_NAME}_models"
 export do_lower_case=true
@@ -87,18 +83,18 @@ export NUM_EVAL_EXAMPLES=5000
 ### 4. Prediction
 
 #### Export the model.
-echo "Export the model."
-python run_lasertagger.py \
-  --label_map_file=${label_map_file} \
-  --slot_label_map_file=${slot_label_map_file} \
-  --model_config_file=${CONFIG_FILE} \
-  --max_seq_length=${max_seq_length} \
-  --kernel_size=${kernel_size}  \
-  --output_dir=${MODEL_DIR}  \
-  --do_export=true \
-  --export_path="${MODEL_DIR}/export" \
-  --domain_name=${DOMAIN_NAME} \
-  --entity_type_list_file=${entity_type_list_file}
+#echo "Export the model."
+#python run_lasertagger.py \
+#  --label_map_file=${label_map_file} \
+#  --slot_label_map_file=${slot_label_map_file} \
+#  --model_config_file=${CONFIG_FILE} \
+#  --max_seq_length=${max_seq_length} \
+#  --kernel_size=${kernel_size}  \
+#  --output_dir=${MODEL_DIR}  \
+#  --do_export=true \
+#  --export_path="${MODEL_DIR}/export" \
+#  --domain_name=${DOMAIN_NAME} \
+#  --entity_type_list_file=${entity_type_list_file}
 
 ######### Get the most recently exported model directory.
 TIMESTAMP=$(ls "${MODEL_DIR}/export/" | \
@@ -126,20 +122,20 @@ echo "python score_main.py --prediction_file=" ${PREDICTION_FILE}
 python score_main.py --prediction_file=${PREDICTION_FILE} --vocab_file=${BERT_BASE_DIR}/vocab.txt --do_lower_case=true --domain_name=${DOMAIN_NAME}
 
 
-echo "predict_main.py for test"
-python predict_main.py \
-  --input_file=${OUTPUT_DIR}/submit.csv \
-  --input_format=${input_format} \
-  --output_file=${PREDICTION_FILE} \
-  --submit_file=${SUBMIT_FILE} \
-  --label_map_file=${label_map_file} \
-  --slot_label_map_file=${slot_label_map_file} \
-  --vocab_file=${BERT_BASE_DIR}/vocab.txt \
-  --max_seq_length=${max_seq_length} \
-  --do_lower_case=${do_lower_case} \
-  --saved_model=${SAVED_MODEL_DIR} \
-  --domain_name=${DOMAIN_NAME} \
-  --entity_type_list_file=${entity_type_list_file}
+#echo "predict_main.py for test"
+#python predict_main.py \
+#  --input_file=${OUTPUT_DIR}/submit.csv \
+#  --input_format=${input_format} \
+#  --output_file=${PREDICTION_FILE} \
+#  --submit_file=${SUBMIT_FILE} \
+#  --label_map_file=${label_map_file} \
+#  --slot_label_map_file=${slot_label_map_file} \
+#  --vocab_file=${BERT_BASE_DIR}/vocab.txt \
+#  --max_seq_length=${max_seq_length} \
+#  --do_lower_case=${do_lower_case} \
+#  --saved_model=${SAVED_MODEL_DIR} \
+#  --domain_name=${DOMAIN_NAME} \
+#  --entity_type_list_file=${entity_type_list_file}
 
 end_tm=`date +%s%N`;
 use_tm=`echo $end_tm $start_tm | awk '{ print ($1 - $2) / 1000000000 /3600}'`

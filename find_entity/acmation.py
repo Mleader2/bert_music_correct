@@ -1,23 +1,18 @@
-import os
-from collections import defaultdict
-import json, time
+import json, os
 import re
 from curLine_file import curLine, normal_transformer
 
 re_phoneNum = re.compile("[0-9一二三四五六七八九十拾]+")  # 编译
 
-waibu_folder = "/home/cloudminds/Mywork/corpus/compe/69/crawler_entity/"
-ignoreSongMap = {}
+entity_files_folder = "./entity_files"
+entity_folder = os.path.join(entity_files_folder, "slot-dictionaries")
 frequentSong = {}
 frequentSinger = {}
-with open(waibu_folder+"ignoreSongMap.json", "r") as f:
-    ignoreSongMap = json.load(f)
-with open(waibu_folder+"frequentSong.json", "r") as f:
+with open(os.path.join(entity_files_folder,"frequentSong.json"), "r") as f:
     frequentSong = json.load(f)
 
-with open(waibu_folder+"frequentSinger.json", "r") as f:
+with open(os.path.join(entity_files_folder,"frequentSinger.json"), "r") as f:
     frequentSinger = json.load(f)
-neibu_folder ="/home/cloudminds/Mywork/corpus/compe/69"
 
 # AC自动机, similar to trie tree
 class State(object):
@@ -214,7 +209,7 @@ class KeywordTree(object):
 def add_to_ac(ac, entity_type, entity_before, entity_after, pri):
     entity_before = normal_transformer(entity_before)
     flag = "ignore"
-    if entity_type == "song" and ((entity_after in ignoreSongMap or entity_after in frequentSong) and entity_after not in {"李白"}):
+    if entity_type == "song" and ((entity_after in frequentSong) and entity_after not in {"李白"}):
         return flag
     if entity_type == "singer" and entity_after in frequentSinger:
         return flag

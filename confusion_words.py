@@ -3,23 +3,12 @@
 from pypinyin import lazy_pinyin, pinyin, Style
 # pinyin 的方法默认带声调，而 lazy_pinyin 方法不带声调,但是会得到不常见的多音字
 # pinyin(c, heteronym=True, style=0)  不考虑音调情况下的多音字
-
-# from tqdm import tqdm
-import json
-import jieba
 from Levenshtein import distance # python-Levenshtein
 # 编辑距离 (Levenshtein Distance算法)
 import os
-
-# import re
-# import dimsim
-import time
-from confusion_words_duoyin import get_pinyin_combination # 考虑多音字
 from curLine_file import curLine
+from find_entity.acmation import entity_folder
 
-
-# 给的实体库
-entity_folder = "/home/cloudminds/Mywork/corpus/compe/69/slot-dictionaries"
 number_map = {"0":"零", "1":"一", "2":"二", "3":"三", "4":"四", "5":"五", "6":"六", "7":"七", "8":"八", "9":"九"}
 cons_table = {'n': 'l', 'l': 'n', 'f': 'h', 'h': 'f', 'zh': 'z', 'z': 'zh', 'c': 'ch', 'ch': 'c', 's': 'sh', 'sh': 's'}
 # def get_similar_pinyin(entity_type): # 存的时候直接把拼音的变体也保存下来

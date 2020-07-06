@@ -3,14 +3,14 @@ import os
 from collections import defaultdict
 import re
 import json
-from .acmation import KeywordTree, add_to_ac, neibu_folder, waibu_folder
+from .acmation import KeywordTree, add_to_ac, entity_files_folder, entity_folder
 from curLine_file import curLine, normal_transformer
 
 re_phoneNum = re.compile("[0-9一二三四五六七八九十拾]+")  # 编译
 
 # AC自动机, similar to trie tree
 # 也许直接读取下载的ｘｌｓ文件更方便，但那样需要安装ｘｌｒｄ模块
-entity_folder = "/home/cloudminds/Mywork/corpus/compe/69/slot-dictionaries"
+
 domain2entity_map = {}
 domain2entity_map["music"] = ["age", "singer", "song", "toplist", "theme", "style", "scene", "language", "emotion", "instrument"]
 # domain2entity_map["navigation"] = ["custom_destination", "city"] # "destination", "origin"]
@@ -25,7 +25,7 @@ for domain, entity_type_list in domain2entity_map.items():
             ac = self_entity_trie_tree[entity_type]
 
         ### 从标注语料中挖掘得到
-        entity_file = os.path.join(neibu_folder, "%s.json" % entity_type)
+        entity_file = os.path.join(entity_files_folder, "%s.json" % entity_type)
         with open(entity_file, "r") as fr:
             current_entity_dict = json.load(fr)
         print(curLine(), "get %d %s from %s" % (len(current_entity_dict), entity_type, entity_file))
@@ -51,7 +51,6 @@ for domain, entity_type_list in domain2entity_map.items():
                 if entity_type in ["song"]:
                     pri -= 0.5
                 add_to_ac(ac, entity_type, entity_before, entity_after, pri=pri)
-
         ac.finalize()
         self_entity_trie_tree[entity_type] = ac
 
@@ -81,7 +80,7 @@ def get_slot_info(query, domain):
             if entity_type != "song" and len(entity_before) < 2 and entity_before not in ["家","妈"]:
                 ignore_flag = True
             if entity_type == "song" and len(entity_before) < 2 and \
-                    entity_before not in {"鱼", "云", "逃", "退", "陶", "美", "图", "默"}: # 播放唱雪
+                    entity_before not in {"鱼", "云", "逃", "退", "陶", "美", "图", "默"}:
                 ignore_flag = True
             if entity_before in {"什么歌", "一首", "小花","叮当","傻逼", "给你听", "现在", "当我"}:
                 ignore_flag = True
@@ -102,7 +101,7 @@ def get_slot_info(query, domain):
         if entity_type in exist_entityType_set:
             continue  # 已经有这个类型了,忽略 # TODO
         start_location = slot_info.find(entity_before)
-        if start_location > -1:  #  exist
+        if start_location > -1:
             exist_entityType_set.add(entity_type)
             if entity_after == entity_before:
                 entity_info_str = "<%s>%s</%s>" % (entity_type, entity_after, entity_type)

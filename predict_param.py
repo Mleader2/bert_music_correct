@@ -9,9 +9,7 @@ from Levenshtein import distance
 from curLine_file import curLine
 from find_entity.exacter_acmation import get_all_entity
 from confusion_words_danyin import  correct_song, correct_singer
-tongyin_yuzhi = 0.75
-
-
+tongyin_yuzhi = 0.65
 char_distance_yuzhi = 0.6
 
 
@@ -31,8 +29,6 @@ def get_char_similarScore(predict_entity, known_entity):
 
 def get_slot_info_str_forMusic(slot_info, raw_query, entityTypeMap):  # 列表连接成字符串
   # 没有直接ｊｏｉｎ得到字符串，因为想要剔除某些只有一个字的实体　例如phone_num
-  # print(curLine(), len(slot_info), "slot_info:", slot_info)
-
   slot_info_block = []
   param_list = []
   current_entityType = None
@@ -77,7 +73,7 @@ def get_slot_info_str_forMusic(slot_info, raw_query, entityTypeMap):  # 列表�
             ignore_flag = True
           if len(entity_before) < 2:   # 忽略这个短的槽值
             ignore_flag = True
-          if current_entityType == "song" and entity_before in {"鱼", "云", "逃", "退", "陶", "美", "图", "默", "哭", "雪"}:  # TODO ｓｏｎｇ的白名单, 来一首不
+          if current_entityType == "song" and entity_before in {"鱼", "云", "逃", "退", "陶", "美", "图", "默", "哭", "雪"}:
             ignore_flag = False  # 这个要在后面判断
       if ignore_flag:
         if entity_before not in "好点没走":
@@ -88,7 +84,6 @@ def get_slot_info_str_forMusic(slot_info, raw_query, entityTypeMap):  # 列表�
       current_entityType = None
     elif current_entityType is not None: # is in a slot
       slot_info_block.append(token)
-    # print(curLine(), token, len(param_list), "param_list:", param_list)
   param_list_sorted = sorted(param_list, key=lambda item: len(item['before'])*100+item['priority'],
                              reverse=True)
   slot_info_str_list = [raw_query]
@@ -105,17 +100,10 @@ def get_slot_info_str_forMusic(slot_info, raw_query, entityTypeMap):  # 列表�
       similar_score = 0.0
       best_similar_word = None
       if entityType == "singer":
-        similar_score, best_similar_word = correct_singer(entity_before, jichu_distance=0.001, char_ratio=0.1)
-        # similar_score -= 0.1 # TODO 提高对ｓｉｎｇｅｒ的阈值
+        similar_score, best_similar_word = correct_singer(entity_before, jichu_distance=0.001, char_ratio=0.1, char_distance=0)
       elif entityType == "song":
-        similar_score, best_similar_word = correct_song(entity_before, jichu_distance=0.001, char_ratio=0.48)
-
-      # if entityType == "singer":
-      #   similar_score, best_similar_word = pinyin_similar_word_noduoyin(singer_pinyin, entity_before)
-      # elif entityType == "song":
-      #   similar_score, best_similar_word = pinyin_similar_word_noduoyin(song_pinyin, entity_before)
-
-      if similar_score > tongyin_yuzhi and best_similar_word != entity_before:
+        similar_score, best_similar_word = correct_song(entity_before, jichu_distance=0.001, char_ratio=0.1, char_distance=0)
+      if similar_score > tongyin_yuzhi and best_similar_word != entity_before:  #  槽值纠错
           # print(curLine(), entityType, "entity_before:",entity_before, best_similar_word, similar_score)
           param['after'] = best_similar_word
 
@@ -135,19 +123,11 @@ def get_slot_info_str_forMusic(slot_info, raw_query, entityTypeMap):  # 列表�
       slot_info_str_list = slot_info_str_list[:s_index] + insert_list + slot_info_str_list[s_index+1:]
       break  # 一个槽值只替换一次
   slot_info_str = "".join(slot_info_str_list)
-  # if "大悲咒" in raw_query or "播一下我的楼兰" in raw_query: # "货源" in raw_query or "开花" in raw_query or
-  #   print(curLine(), raw_query, entityTypeMap)
-  #   print(curLine(), "slot_info_str:", slot_info_str)
-  #   print(curLine(), len(param_list_sorted), "param_list_sorted:", param_list_sorted)
-  #   input(curLine())
   return slot_info_str
 
 
 def get_slot_info_str(slot_info, raw_query, entityTypeMap): # 列表连接成字符串
   # 没有直接ｊｏｉｎ得到字符串，因为想要剔除某些只有一个字的实体　例如phone_num
-  # print(curLine(), len(slot_info), "slot_info:", slot_info)
-  if "货源" in raw_query or "开花" in raw_query:
-    print(curLine(), raw_query, entityTypeMap)
   slot_info_str = []
   slot_info_block = []
   current_entityType = None
@@ -178,7 +158,7 @@ def get_slot_info_str(slot_info, raw_query, entityTypeMap): # 列表连接成字
             if len(slot_info_block_str) < 2 and slot_info_block_str not in {"鱼","云","逃","退"}:
               ignore_flag = True  # 忽略一个字的
             elif slot_info_block_str in {"什么歌", "一首"}:
-              ignore_flag = True # 忽略一个字的
+              ignore_flag = True  # 忽略一个字的
             else:
               if current_entityType == "singer":
                 similar_score, best_similar_word = correct_singer(slot_info_block_str)
@@ -221,5 +201,4 @@ def get_slot_info_str(slot_info, raw_query, entityTypeMap): # 列表连接成字
     else:  # is in a slot
       slot_info_block.append(token)
   slot_info_str = "".join(slot_info_str)
-  # print(curLine(), "slot_info_str:", slot_info_str)
   return slot_info_str

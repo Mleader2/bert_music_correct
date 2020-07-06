@@ -4,10 +4,9 @@ import os
 from collections import defaultdict
 import json
 import re
-from .acmation import KeywordTree, add_to_ac, neibu_folder, waibu_folder
+from .acmation import KeywordTree, add_to_ac, entity_files_folder, entity_folder
 from curLine_file import curLine, normal_transformer
 
-entity_folder = "/home/cloudminds/Mywork/corpus/compe/69/slot-dictionaries"
 domain2entity_map = {}
 domain2entity_map["music"] = ["age", "singer", "song", "toplist", "theme", "style", "scene", "language", "emotion", "instrument"]
 domain2entity_map["navigation"] = ["custom_destination", "city"]  # place city
@@ -40,7 +39,7 @@ for domain, entity_type_list in domain2entity_map.items():
 
             ## 从标注语料中挖掘得到的地名
             for current_entity_type in ["destination", "origin"]:
-                entity_file = os.path.join(neibu_folder, "%s.json" % current_entity_type)
+                entity_file = os.path.join(entity_files_folder, "%s.json" % current_entity_type)
                 with open(entity_file, "r") as f:
                     current_entity_dict = json.load(f)
                     print(curLine(), "get %d %s from %s" %
@@ -75,7 +74,7 @@ def get_all_entity(corpus, useEntityTypeList):
             after, priority = res.meta_data
             self_entityTypeMap[entity_type].append({'before': res.keyword, 'after': after, "priority":priority})
     if "phone_num" in useEntityTypeList:
-        token_numbers = re_phoneNum.findall(query)
+        token_numbers = re_phoneNum.findall(corpus)
         for number in token_numbers:
             self_entityTypeMap["phone_num"].append({'before':number, 'after':number, 'priority': 2})
     return self_entityTypeMap

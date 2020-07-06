@@ -6,12 +6,9 @@ from Levenshtein import distance # python-Levenshtein
 import copy
 import sys
 import os, json
-from find_entity.acmation import neibu_folder
+from find_entity.acmation import entity_files_folder, entity_folder
 from curLine_file import curLine
 
-
-# 给的实体库
-entity_folder = "/home/cloudminds/Mywork/corpus/compe/69/slot-dictionaries"
 number_map = {"0":"十", "1":"一", "2":"二", "3":"三", "4":"四", "5":"五", "6":"六", "7":"七", "8":"八", "9":"九"}
 cons_table = {'n': 'l', 'l': 'n', 'f': 'h', 'h': 'f', 'zh': 'z', 'z': 'zh', 'c': 'ch', 'ch': 'c', 's': 'sh', 'sh': 's'}
 vowe_table = {'ai': 'ei', 'an': 'ang', 'en': 'eng', 'in': 'ing',
@@ -101,7 +98,7 @@ def get_entityType_pinyin(entity_type):
         add_pinyin(raw_entity, entity_info_dict, priority, entity_type)
 
     ### TODO  从标注语料中挖掘得到
-    entity_file = os.path.join(neibu_folder, "%s.json" % entity_type)
+    entity_file = os.path.join(entity_files_folder, "%s.json" % entity_type)
     with open(entity_file, "r") as fr:
         current_entity_dict = json.load(fr)
     print(curLine(), "get %d %s from %s, priority=%f" % (len(current_entity_dict), entity_type, entity_file, priority))
@@ -176,12 +173,12 @@ print(curLine(), len(singer_pinyin), "singer_pinyin")
 song_pinyin = get_entityType_pinyin(entity_type="song")
 print(curLine(), len(song_pinyin), "song_pinyin")
 
-def correct_song(entity_before,jichu_distance=0.001,   char_ratio=0.53, char_distance=0.1):  # char_ratio=0.48):
+def correct_song(entity_before, jichu_distance=0.001,   char_ratio=0.53, char_distance=0.1):  # char_ratio=0.48):
     top_similar_score, best_similar_word = pinyin_similar_word_danyin(
         song_pinyin, entity_before, jichu_distance, char_ratio, char_distance)
     return top_similar_score, best_similar_word
 
-def correct_singer(entity_before,jichu_distance=0.001, char_ratio=0.5, char_distance=0.1):  # char_ratio=0.1, char_distance=1.0):
+def correct_singer(entity_before, jichu_distance=0.001, char_ratio=0.5, char_distance=0.1):  # char_ratio=0.1, char_distance=1.0):
     top_similar_score, best_similar_word = pinyin_similar_word_danyin(
         singer_pinyin, entity_before, jichu_distance, char_ratio, char_distance)
     return top_similar_score, best_similar_word
@@ -198,7 +195,7 @@ def test(entity_type, pinyin_ku, score_threshold, jichu_distance, char_ratio=0.0
         raw_entity = line.strip()
         entity_set.add(raw_entity)
     # 抽取的实体作为测试集合
-    entity_file = os.path.join(neibu_folder, "%s.json" % entity_type)
+    entity_file = os.path.join(entity_files_folder, "%s.json" % entity_type)
     with open(entity_file, "r") as fr:
         current_entity_dict = json.load(fr)
     test_num = 0.0
