@@ -154,12 +154,6 @@ class ModelFnBuilder(object):
     layer_matrix = tf.concat([output_fw_seq, output_bw_seq], axis=-1)
     final_hidden = tf.concat([c_fw, c_bw], axis=-1)
 
-    # rnn_cell = tf.contrib.rnn.BasicLSTMCell(self.lstm_hidden_size)
-    # final_layer, (final_hidden,_) = tf.nn.dynamic_rnn(cell=rnn_cell, # output,(c,h)
-    #              inputs=final_layer, initial_state=None, dtype=tf.float32)
-    # print(curLine(), "final_layer:", final_layer)
-    # print(curLine(), "final_hidden:", final_hidden)
-
     layer_matrix= tf.contrib.layers.layer_norm(
             inputs=layer_matrix, begin_norm_axis=-1, begin_params_axis=-1)
 
