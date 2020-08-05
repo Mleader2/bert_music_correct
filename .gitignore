@@ -5,6 +5,7 @@
 *.jsonl
 *.pickle
 *results.txt
+hunxiao_words.txt
 *.csv
 
 # Distribution / packaging

@@ -4,7 +4,7 @@ import os
 import csv, json
 from collections import defaultdict
 import re
-from curLine_file import curLine, normal_transformer, other_tag
+from curLine_file import curLine, other_tag
 
 all_entity_dict = defaultdict(dict)
 before2after = {"父亲":"父亲", "赵磊":"赵磊", "甜蜜":"甜蜜", "大王叫我来":"大王叫我来巡山"}
@@ -33,10 +33,8 @@ def get_slot(param):
         before,after = entity_info, entity_info
         if "||" in entity_info:
             before, after = entity_info.split("||")
-            print(curLine(), entityType, before, after)
         if before in before2after:
             after = before2after[before]
-        # add
         if before not in all_entity_dict[entityType]:
             all_entity_dict[entityType][before] = [after, 1]
         else:
@@ -45,7 +43,6 @@ def get_slot(param):
             assert after == all_entity_dict[entityType][before][0]
             all_entity_dict[entityType][before][1] += 1
         if before != after:
-            # print(curLine(), entityType, before, after)
             before = after
             if before not in all_entity_dict[entityType]:
                 all_entity_dict[entityType][before] = [after, 1]
@@ -54,53 +51,48 @@ def get_slot(param):
                 all_entity_dict[entityType][before][1] += 1
 
 
-
+# 预处理
 def process(source_file, train_file, dev_file):
     dev_lines = []
-
     train_num = 0
     intent_distribution = defaultdict(dict)
-    with open(source_file, "r") as f:
+    with open(source_file, "r") as f, open(train_file, "w") as f_train:
         reader = csv.reader(f)
-        if True:
-        # with open(train_file, "w") as f_train:
-        #     train_write = csv.writer(f_train, dialect='excel')
-            for row_id, line in enumerate(reader):
-                if row_id==0:
-                    continue
-                (sessionId, raw_query, domain_intent, param) = line
-                all_slot = get_slot(param)
+        train_write = csv.writer(f_train, dialect='excel')
+        for row_id, line in enumerate(reader):
+            if row_id==0:
+                continue
+            (sessionId, raw_query, domain_intent, param) = line
+            get_slot(param)
 
-                if domain_intent == other_tag:
-                    domain = other_tag
-                    intent = other_tag
-                else:
-                    domain, intent = domain_intent.split(".")
-                if intent in intent_distribution[domain]:
-                    intent_distribution[domain][intent] += 1
-                else:
-                    intent_distribution[domain][intent] = 0
-                if row_id == 0:
-                    continue
-                sessionId = int(sessionId)
-                if sessionId % 10>0:
-                    # train_write.writerow(line)
-                    train_num += 1
-                else:
-                    dev_lines.append(line)
-    # with open(dev_file, "w") as f_dev:
-    #     write = csv.writer(f_dev, dialect='excel')
-    #     for line in dev_lines:
-    #         write.writerow(line)
+            if domain_intent == other_tag:
+                domain = other_tag
+                intent = other_tag
+            else:
+                domain, intent = domain_intent.split(".")
+            if intent in intent_distribution[domain]:
+                intent_distribution[domain][intent] += 1
+            else:
+                intent_distribution[domain][intent] = 0
+            if row_id == 0:
+                continue
+            sessionId = int(sessionId)
+            if sessionId % 10>0:
+                train_write.writerow(line)
+                train_num += 1
+            else:
+                dev_lines.append(line)
+    with open(dev_file, "w") as f_dev:
+        write = csv.writer(f_dev, dialect='excel')
+        for line in dev_lines:
+            write.writerow(line)
     print(curLine(), "dev=%d, train=%d" % (len(dev_lines), train_num))
-    # print(curLine(), "all_num=%d" % all_num)
     for domain, intent_num in intent_distribution.items():
         print(curLine(), domain, intent_num)
 
 
 if __name__ == "__main__":
-    host_name = "cloudminds"
-    corpus_folder = "/home/%s/Mywork/corpus/compe/69" % (host_name)
+    corpus_folder = "/home/wzk/Mywork/corpus/compe/69"
     source_file = os.path.join(corpus_folder, "train.csv")
     train_file = os.path.join(corpus_folder, "train.txt")
     dev_file = os.path.join(corpus_folder, "dev.txt")
@@ -111,3 +103,4 @@ if __name__ == "__main__":
         with open(json_file, "w") as f:
             json.dump(entityDict, f, ensure_ascii=False, indent=4)
         print(curLine(), "save %d %s to %s" % (len(entityDict), entityType, json_file))
+

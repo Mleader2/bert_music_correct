@@ -63,7 +63,7 @@ def get_all_entity(corpus, useEntityTypeList):
             after, priority = res.meta_data
             self_entityTypeMap[entity_type].append({'before': res.keyword, 'after': after, "priority":priority})
     if "phone_num" in useEntityTypeList:
-        token_numbers = re_phoneNum.findall(query)
+        token_numbers = re_phoneNum.findall(corpus)
         for number in token_numbers:
             self_entityTypeMap["phone_num"].append({'before':number, 'after':number, 'priority': 2})
     return self_entityTypeMap
